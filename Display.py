@@ -14,11 +14,13 @@ def highest(data):
             if (element > value):
                 value = element
 
-    return value
+    return max(value, 1)
 
 class Display(Tk):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, board, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
+
+        self.board = board
 
         self.rows = 8
         self.columns = 8
@@ -30,6 +32,8 @@ class Display(Tk):
         self.canvas.pack(side="top", fill="both", expand="true")
 
         self.squares = [[0 for i in range (self.rows)] for i in range (self.columns)]
+
+        self.bind("<Button-1>", self.tryMovePiece)
 
         for column in range(self.columns):
             for row in range(self.rows):
@@ -51,8 +55,8 @@ class Display(Tk):
             for imageIndex in range (len (pieceImages[rowIndex])):
                 pieceImages[rowIndex][imageIndex] = PhotoImage (file = pieceImages[rowIndex][imageIndex])
 
-    def showAttacks(self, attacks):
-        maxAttack = highest(attacks)
+    def showAttacks(self):
+        maxAttack = highest(self.board.attacks)
 
         for rankIndex in range(self.columns):
             for fileIndex in range(self.rows):
@@ -62,7 +66,7 @@ class Display(Tk):
                 y2 = y1 + self.cellheight
 
                 self.squares[rankIndex][fileIndex] = self.canvas.create_rectangle(x1, y1, x2, y2,
-                                                                                  fill=self.matchColor(attacks[rankIndex][fileIndex], maxAttack, (rankIndex + fileIndex) % 2 == 0), tags="rect")
+                                                                                  fill=self.matchColor(self.board.attacks[rankIndex][fileIndex], maxAttack, (rankIndex + fileIndex) % 2 == 0), tags="rect")
 
     def matchColor(self, attack, maxAttack, isWhite):
         value = attack / maxAttack * 255
@@ -81,13 +85,19 @@ class Display(Tk):
         else:
             return "#" + hexVal.replace("-", "") + "0000" # we need to replace the sign returned by hex()
 
-    def showPieces(self, pieces):
+    def showPieces(self):
         for rankIndex in range (self.rows):
             for fileIndex in range (self.columns):
-                piece = pieces[rankIndex][fileIndex]
+                piece = self.board.pieces[rankIndex][fileIndex]
                 pieceImage = pieceImages[piece.color.value][piece.type.value]
 
                 x = fileIndex * self.cellwidth
                 y = rankIndex * self.cellheight
 
                 self.canvas.create_image(x, y, anchor = "nw", image = pieceImage)
+
+    def tryMovePiece(self, event):
+        self.board.clickedSquare (int(event.x / self.cellwidth), int(event.y / self.cellheight))
+
+        self.showAttacks()
+        self.showPieces()

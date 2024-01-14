@@ -33,6 +33,17 @@ class Piece:
             case 'q': self.type = Piece.Type.Queen
             case 'k': self.type = Piece.Type.King
 
+    def isPiece(self):
+        return (self.type != Piece.Type.NoType) and (self.color != Piece.Color.NoClr)
+
+    def invalidate(self):
+        self.type = Piece.Type.NoType
+        self.color = Piece.Color.NoClr
+
+    def set(self, other):
+        self.type = other.type
+        self.color = other.color
+
 class ChessBoard:
     castleWKing = True
     castleWQueen = True
@@ -41,6 +52,10 @@ class ChessBoard:
 
     pieces  = [[Piece for i in range (8)] for i in range (8)] # can't just use operator* since it leads to each rank being the same
     attacks = [[0     for i in range (8)] for i in range (8)]
+
+    pieceSelected = False
+    selectedRank = -1
+    selectedFile = -1
 
     def loadFEN (self, fen):
         rank = 0
@@ -193,3 +208,25 @@ class ChessBoard:
             for fileOffset in range (-1, 2):
                 if (not (fileOffset == 0 and rankOffset == 0)):
                     self.secureAddAttack(rank + rankOffset, file + fileOffset, value)
+
+    def clickedSquare(self, file, rank):
+        if (self.pieceSelected):
+            movedPiece = self.pieces[self.selectedRank][self.selectedFile]
+            self.pieces[rank][file].set(movedPiece)
+
+            self.pieces[self.selectedRank][self.selectedFile].invalidate()
+            self.pieceSelected = False
+
+            self.calculateAttacks()
+
+            print("moved piece")
+
+        else:
+            if(not self.pieces[rank][file].isPiece()):
+                return
+
+            self.pieceSelected = True
+            self.selectedRank = rank
+            self.selectedFile = file
+
+            print("selected piece")
