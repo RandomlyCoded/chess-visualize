@@ -11,8 +11,8 @@ def highest(data):
     value = float('-inf')
     for row in data:
         for element in row:
-            if (element > value):
-                value = element
+            if (abs(element) > value):
+                value = abs(element)
 
     return max(value, 1)
 
@@ -35,6 +35,7 @@ class Display(Tk):
 
         self.bind("<Button-1>", self.tryMovePiece)
 
+        # initially show a blank grid of black and white squares
         for column in range(self.columns):
             for row in range(self.rows):
                 x1 = column * self.cellwidth
