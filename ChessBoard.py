@@ -223,8 +223,6 @@ class ChessBoard:
 
             self.calculateAttacks()
 
-            print("moved piece")
-
         else:
             if(not self.pieces[rank][file].isPiece()):
                 return
@@ -232,5 +230,3 @@ class ChessBoard:
             self.pieceSelected = True
             self.selectedRank = rank
             self.selectedFile = file
-
-            print("selected piece")
