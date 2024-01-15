@@ -69,7 +69,7 @@ class Display(Tk):
                                                                                   fill=self.matchColor(self.board.attacks[rankIndex][fileIndex], maxAttack, (rankIndex + fileIndex) % 2 == 0), tags="rect")
 
     def matchColor(self, attack, maxAttack, isWhite):
-        value = attack / maxAttack * 255
+        value = min(255, attack / maxAttack * 255)
 
         if (value == 0):
             if (isWhite):
@@ -78,6 +78,8 @@ class Display(Tk):
             return "#000000"
 
         hexVal = hex(int(value)).replace("0x", "")
+        if(len(hexVal) == 1):
+            hexVal = "0" + hexVal
 
         if (value > 0):
             return "#00" + hexVal + "00"
