@@ -33,6 +33,7 @@ class Piece:
             case 'q': self.type = Piece.Type.Queen
             case 'k': self.type = Piece.Type.King
 
+    # check if the piece is valid
     def isPiece(self):
         return (self.type != Piece.Type.NoType) and (self.color != Piece.Color.NoClr)
 
@@ -45,12 +46,13 @@ class Piece:
         self.color = other.color
 
 class ChessBoard:
+    # currently unused, but will be useful if I end up adding move validation
     castleWKing = True
     castleWQueen = True
     castleBKing = True
     castleBQueen = True
 
-    pieces  = [[Piece for i in range (8)] for i in range (8)] # can't just use operator* since it leads to each rank being the same
+    pieces  = [[Piece for i in range (8)] for i in range (8)] # can't just use operator* since it leads to each rank and piece being at the same address
     attacks = [[0     for i in range (8)] for i in range (8)]
 
     pieceSelected = False
@@ -67,10 +69,10 @@ class ChessBoard:
                 file = 0
                 continue
 
-            if (c == ' '):
+            if (c == ' '): # end of "normal" position, next part would be meta info (whose turn, castle rights...), which I don't use right now
                 return;
 
-            if(c.isnumeric()):
+            if(c.isnumeric()): # blank squares
                 for i in range(int(c)):
                     self.pieces[rank][file] = Piece(c)
                     file += 1
@@ -81,13 +83,13 @@ class ChessBoard:
 
             file += 1
 
-    # "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     def __init__(self, fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
         self.loadFEN(fen)
 
     def calculateAttacks(self):
         self.attacks = [[0     for i in range (8)] for i in range (8)]
 
+        # get the attacks by iterating over each square and generating the attacks made by the piece on that square
         for rankIndex in range(8):
             for fileIndex in range (8):
                 piece = self.pieces[rankIndex][fileIndex]
@@ -105,6 +107,7 @@ class ChessBoard:
                     case Piece.Type.Queen  : self.addMovesQueen (rankIndex, fileIndex             , value)
                     case Piece.Type.King   : self.addMovesKing  (rankIndex, fileIndex             , value)
 
+    # wrapper to check if the requested square is out of bounds, if so returns false, otherwise adds the attack and returns true
     def secureAddAttack (self, file, rank, value):
         if (file >= 0 and file < 8 and
             rank >= 0 and rank < 8):
@@ -156,6 +159,7 @@ class ChessBoard:
                 break # nothing more on this diagonal
 
     def addMovesKnight(self, rank, file, value):
+        # I just hard coded the knight moves since it seemed easier to just do it this way
         self.secureAddAttack(rank - 2, file - 1, value)
         self.secureAddAttack(rank - 1, file - 2, value)
         self.secureAddAttack(rank + 1, file - 2, value)
@@ -199,7 +203,7 @@ class ChessBoard:
                 break # nothing more on this file
 
     def addMovesQueen(self, rank, file, value):
-        # the queen is basically a combination of rook and bishop, so we treat it this way:
+        # the queen is basically a combination of a rook and a bishop, so we treat it this way:
         self.addMovesRook  (rank, file, value)
         self.addMovesBishop(rank, file, value)
 
