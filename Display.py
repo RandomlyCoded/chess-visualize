@@ -43,12 +43,7 @@ class Display(Tk):
                 x2 = x1 + self.cellwidth
                 y2 = y1 + self.cellheight
 
-                color = "black"
-
-                if ((row + column) % 2 == 0):
-                    color = "white"
-
-                self.squares[row][column] = self.canvas.create_rectangle(x1, y1, x2, y2, fill=color, tags="rect")
+                self.squares[row][column] = self.canvas.create_rectangle(x1, y1, x2, y2, fill=self.squareColor(row, column), tags="rect")
 
 
         # finish initializing the piece piece, so we don't need to generate them each time we draw the pieces
@@ -59,15 +54,17 @@ class Display(Tk):
     def showAttacks(self):
         maxAttack = highest(self.board.attacks)
 
+        self.attacks = [[0] * 8] * 8
+
         for rankIndex in range(self.columns):
             for fileIndex in range(self.rows):
-                x1 = rankIndex * self.cellwidth
-                y1 = fileIndex * self.cellheight
-                x2 = x1 + self.cellwidth
-                y2 = y1 + self.cellheight
+                x1 = rankIndex * self.cellwidth + 2
+                y1 = fileIndex * self.cellheight + 2
+                x2 = x1 + self.cellwidth - 4
+                y2 = y1 + self.cellheight - 4
 
-                self.squares[rankIndex][fileIndex] = self.canvas.create_rectangle(x1, y1, x2, y2,
-                                                                                  fill=self.matchColor(self.board.attacks[rankIndex][fileIndex], maxAttack, (rankIndex + fileIndex) % 2 == 0), tags="rect")
+                self.attacks[rankIndex][fileIndex] = self.canvas.create_oval(x1, y1, x2, y2,
+                                                                                  fill=self.matchColor(self.board.attacks[rankIndex][fileIndex], maxAttack, (rankIndex + fileIndex) % 2 == 0), tags = "oval", outline = self.squareColor(rankIndex, fileIndex))
 
     def matchColor(self, attack, maxAttack, isWhite):
         value = min(255, attack / maxAttack * 255)
@@ -94,8 +91,8 @@ class Display(Tk):
                 piece = self.board.pieces[rankIndex][fileIndex]
                 pieceImage = pieceImages[piece.color.value][piece.type.value]
 
-                x = fileIndex * self.cellwidth
-                y = rankIndex * self.cellheight
+                x = fileIndex * self.cellwidth + 2
+                y = rankIndex * self.cellheight + 2
 
                 self.canvas.create_image(x, y, anchor = "nw", image = pieceImage)
 
@@ -104,3 +101,9 @@ class Display(Tk):
 
         self.showAttacks()
         self.showPieces()
+
+    def squareColor(self, row, column):
+        if ((row + column) % 2 == 0):
+            return "white"
+
+        return "black"
